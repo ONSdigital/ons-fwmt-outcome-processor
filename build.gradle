@@ -1,0 +1,113 @@
+buildscript {
+    ext {
+        springVersion = '5.2.3.RELEASE'
+        springBootVersion = '2.2.4.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'com.jfrog.artifactory' version '4.13.0'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+}
+
+description = 'ons-fwmt-outcome-processors'
+group = 'uk.gov.ons.ons.fwmt'
+version = rootProject.file('version.txt').text.trim()
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+repositories {
+    mavenLocal()
+
+    maven {
+        url 'https://ons.jfrog.io/ons/libs-releases-virtual'
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+    maven {
+        url 'https://ons.jfrog.io/ons/libs-snapshots-virtual'
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.github.spotbugs:spotbugs-annotations:4.0.1'
+
+    // Default
+    implementation 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+
+    // Data
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa:2.2.4.RELEASE'
+
+    // Project libs
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:3.0.51-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:2.0.2-SNAPSHOT'
+    compile 'uk.gov.ons.ctp.integration.common:product-reference:1.0.14'
+    compile 'uk.gov.ons.census.ffa:census-ffa-storage-utils:0.0.4-RELEASE'
+
+    // Templating
+    compile 'org.freemarker:freemarker:2.3.28'
+
+    // Encryption
+    compile 'org.bouncycastle:bcprov-jdk15on:1.61'
+    compile 'org.bouncycastle:bcpg-jdk15on:1.61'
+
+}
+
+dependencyManagement {
+    dependencies {
+        dependency "org.springframework:spring-core:${springVersion}"
+        dependency "org.springframework.boot:spring-boot:${springBootVersion}"
+    }
+}
+
+artifactory {
+    contextUrl = 'https://ons.jfrog.io/ons/'
+    publish {
+        repository {
+            repoKey = 'libs-releases-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publishBuildInfo = false
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = group
+            artifactId = 'ons-fwmt-outcome-test'
+            version = version
+
+            from components.java
+        }
+    }
+}
+
+artifactoryPublish {
+    publications 'maven'
+}
