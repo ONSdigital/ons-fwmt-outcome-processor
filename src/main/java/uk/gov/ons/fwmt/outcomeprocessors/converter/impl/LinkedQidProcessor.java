@@ -1,27 +1,34 @@
 package uk.gov.ons.fwmt.outcomeprocessors.converter.impl;
 
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ORIGINAL_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.OUTCOME_SENT;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSING_OUTCOME;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSOR;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ROUTING_KEY;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SITE_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SURVEY_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TEMPLATE_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TRANSACTION_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.QUESTIONNAIRE_LINKED;
+
+import java.text.DateFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import uk.gov.ons.census.fwmt.common.dto.FulfilmentRequestDto;
 import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache.GatewayCacheBuilder;
 import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
-import uk.gov.ons.fwmt.outcomeprocessors.service.GatewayCacheService;
 import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
-
-import javax.transaction.Transactional;
-import java.text.DateFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.*;
-import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.QUESTIONNAIRE_LINKED;
 
 @Component("LINKED_QID")
 @Transactional
@@ -36,8 +43,8 @@ public class LinkedQidProcessor implements OutcomeServiceProcessor {
   @Autowired
   private GatewayEventManager gatewayEventManager;
 
-  @Autowired
-  private GatewayCacheService gatewayCacheService;
+//  @Autowired
+//  private GatewayCacheService gatewayCacheService;
 
   private boolean isQuestionnaireLinked(FulfilmentRequestDto fulfilmentRequest) {
     return (fulfilmentRequest.getQuestionnaireID() != null);
@@ -62,7 +69,7 @@ public class LinkedQidProcessor implements OutcomeServiceProcessor {
         root.put("caseId", caseId);
         root.put("questionnaireId", fulfilmentRequest.getQuestionnaireID());
         root.put("eventDate", eventDateTime);
-        cacheData(caseId);
+//        cacheData(caseId);
 
         String outcomeEvent = TemplateCreator.createOutcomeMessage(QUESTIONNAIRE_LINKED, root);
 
@@ -79,15 +86,15 @@ public class LinkedQidProcessor implements OutcomeServiceProcessor {
     return caseIdHolder;
   }
 
-  private void cacheData(UUID caseId) {
-    GatewayCache cache = gatewayCacheService.getById(String.valueOf(caseId));
-    GatewayCacheBuilder builder;
-    if (cache == null) builder = GatewayCache.builder();
-    else builder = cache.toBuilder();
-
-    gatewayCacheService.save(builder
-        .caseId(String.valueOf(caseId))
-        .delivered(true)
-        .build());
-  }
+//  private void cacheData(UUID caseId) {
+//    GatewayCache cache = gatewayCacheService.getById(String.valueOf(caseId));
+//    GatewayCacheBuilder builder;
+//    if (cache == null) builder = GatewayCache.builder();
+//    else builder = cache.toBuilder();
+//
+//    gatewayCacheService.save(builder
+//        .caseId(String.valueOf(caseId))
+//        .delivered(true)
+//        .build());
+//  }
 }

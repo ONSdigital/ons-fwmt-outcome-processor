@@ -1,25 +1,34 @@
 package uk.gov.ons.fwmt.outcomeprocessors.converter.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
-import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache;
-import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
-import uk.gov.ons.fwmt.outcomeprocessors.service.GatewayCacheService;
-import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ADDRESS_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.INTERVIEW_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ORIGINAL_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.OUTCOME_SENT;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSING_OUTCOME;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSOR;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROPERTY_LISTED_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ROUTING_KEY;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SURVEY_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TEMPLATE_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TRANSACTION_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.CCS_ADDRESS_LISTED;
+import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.INTERVIEW_REQUIRED;
 
 import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.*;
-import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.CCS_ADDRESS_LISTED;
-import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.INTERVIEW_REQUIRED;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
+import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
+import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
 
 @Component("INTERVIEW_REQUIRED_HH")
 public class InterviewRequiredHhProcessor implements OutcomeServiceProcessor {
@@ -33,8 +42,8 @@ public class InterviewRequiredHhProcessor implements OutcomeServiceProcessor {
   @Autowired
   private GatewayEventManager gatewayEventManager;
 
-  @Autowired
-  private GatewayCacheService gatewayCacheService;
+//  @Autowired
+//  private GatewayCacheService gatewayCacheService;
 
   @Override
   public UUID process(OutcomeSuperSetDto outcome, UUID caseIdHolder, String type) throws GatewayException {
@@ -48,9 +57,9 @@ public class InterviewRequiredHhProcessor implements OutcomeServiceProcessor {
         INTERVIEW_CASE_ID, String.valueOf(newCaseId),
         ADDRESS_TYPE, "HH");
 
-    GatewayCache plCache = gatewayCacheService.getById(String.valueOf(outcome.getCaseId()));
+//    GatewayCache plCache = gatewayCacheService.getById(String.valueOf(outcome.getCaseId()));
 
-    cacheData(outcome, newCaseId);
+//    cacheData(outcome, newCaseId);
 
     String eventDateTime = dateFormat.format(outcome.getEventDate());
     Map<String, Object> root = new HashMap<>();
@@ -61,8 +70,8 @@ public class InterviewRequiredHhProcessor implements OutcomeServiceProcessor {
     root.put("addressType", "HH");
     root.put("addressLevel", "U");
     root.put("interviewRequired", "True");
-    root.put("oa", plCache.getOa());
-    root.put("region",plCache.getOa().charAt(0));
+//    root.put("oa", plCache.getOa());
+//    root.put("region",plCache.getOa().charAt(0));
 
     String outcomeEvent = TemplateCreator.createOutcomeMessage(CCS_ADDRESS_LISTED, root);
 
@@ -79,13 +88,13 @@ public class InterviewRequiredHhProcessor implements OutcomeServiceProcessor {
     return newCaseId;
   }
 
-  private void cacheData(OutcomeSuperSetDto outcome, UUID newCaseId) {
-    gatewayCacheService.save(GatewayCache.builder()
-        .caseId(newCaseId.toString())
-        .existsInFwmt(false)
-        .accessInfo(outcome.getAccessInfo())
-        .careCodes(OutcomeSuperSetDto.careCodesToText(outcome.getCareCodes()))
-        .type(50)
-        .build());
-  }
+//  private void cacheData(OutcomeSuperSetDto outcome, UUID newCaseId) {
+//    gatewayCacheService.save(GatewayCache.builder()
+//        .caseId(newCaseId.toString())
+//        .existsInFwmt(false)
+//        .accessInfo(outcome.getAccessInfo())
+//        .careCodes(OutcomeSuperSetDto.careCodesToText(outcome.getCareCodes()))
+//        .type(50)
+//        .build());
+//  }
 }

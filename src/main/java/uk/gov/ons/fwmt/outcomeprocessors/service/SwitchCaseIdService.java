@@ -6,21 +6,21 @@ import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache;
 
 import javax.transaction.Transactional;
 
-@Component
+//@Component
 public class SwitchCaseIdService {
 
-    @Autowired
-    private GatewayCacheService gatewayCacheService;
-
-    @Transactional
-    public String fromNcToOriginal(String caseID) {
-        GatewayCache gatewayCache = gatewayCacheService.getById(caseID);
-        return gatewayCache.getOriginalCaseId();
-    }
-
-    @Transactional
-    public String fromIdOriginalToNc(String caseId) {
-        GatewayCache gatewayCache = gatewayCacheService.getByOriginalId(caseId);
-        return gatewayCache.getCaseId();
-    }
+//    @Autowired
+//    private GatewayCacheService gatewayCacheService;
+//
+//    @Transactional
+//    public String fromNcToOriginal(String caseID) {
+//        GatewayCache gatewayCache = gatewayCacheService.getById(caseID);
+//        return gatewayCache.getOriginalCaseId();
+//    }
+//
+//    @Transactional
+//    public String fromIdOriginalToNc(String caseId) {
+//        GatewayCache gatewayCache = gatewayCacheService.getByOriginalId(caseId);
+//        return gatewayCache.getCaseId();
+//    }
 }

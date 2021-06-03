@@ -55,39 +55,39 @@ public class RabbitMqConfig {
     this.rmFieldQueue = rmFieldQueue;
   }
 
-  @Bean
-  public RetryTemplate retryTemplate() {
-    RetryTemplate retryTemplate = new RetryTemplate();
-
-    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-    backOffPolicy.setInitialInterval(initialInterval);
-    backOffPolicy.setMultiplier(multiplier);
-    backOffPolicy.setMaxInterval(maxInterval);
-    retryTemplate.setBackOffPolicy(backOffPolicy);
-
-    GatewayRetryPolicy gatewayRetryPolicy = new GatewayRetryPolicy(maxRetries);
-    retryTemplate.setRetryPolicy(gatewayRetryPolicy);
-
-    retryTemplate.registerListener(new DefaultListenerSupport());
-
-    return retryTemplate;
-  }
-
-  @Bean
-  public RetryOperationsInterceptor interceptor(
-      @Qualifier("retryTemplate") RetryOperations retryOperations) {
-    RetryOperationsInterceptor interceptor = new RetryOperationsInterceptor();
-    interceptor.setRecoverer(new GatewayMessageRecover());
-    interceptor.setRetryOperations(retryOperations);
-    return interceptor;
-  }
-
-  @Bean("rmConnectionFactory")
-  public ConnectionFactory connectionFactory() {
-    CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
-    cachingConnectionFactory.setVirtualHost(virtualHost);
-    cachingConnectionFactory.setPassword(password);
-    cachingConnectionFactory.setUsername(username);
-    return cachingConnectionFactory;
-  }
+//  @Bean
+//  public RetryTemplate retryTemplate() {
+//    RetryTemplate retryTemplate = new RetryTemplate();
+//
+//    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+//    backOffPolicy.setInitialInterval(initialInterval);
+//    backOffPolicy.setMultiplier(multiplier);
+//    backOffPolicy.setMaxInterval(maxInterval);
+//    retryTemplate.setBackOffPolicy(backOffPolicy);
+//
+//    GatewayRetryPolicy gatewayRetryPolicy = new GatewayRetryPolicy(maxRetries);
+//    retryTemplate.setRetryPolicy(gatewayRetryPolicy);
+//
+//    retryTemplate.registerListener(new DefaultListenerSupport());
+//
+//    return retryTemplate;
+//  }
+//
+//  @Bean
+//  public RetryOperationsInterceptor interceptor(
+//      @Qualifier("retryTemplate") RetryOperations retryOperations) {
+//    RetryOperationsInterceptor interceptor = new RetryOperationsInterceptor();
+//    interceptor.setRecoverer(new GatewayMessageRecover());
+//    interceptor.setRetryOperations(retryOperations);
+//    return interceptor;
+//  }
+//
+//  @Bean("rmConnectionFactory")
+//  public ConnectionFactory connectionFactory() {
+//    CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
+//    cachingConnectionFactory.setVirtualHost(virtualHost);
+//    cachingConnectionFactory.setPassword(password);
+//    cachingConnectionFactory.setUsername(username);
+//    return cachingConnectionFactory;
+//  }
 }

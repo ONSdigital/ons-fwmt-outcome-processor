@@ -20,8 +20,8 @@ import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfi
 @Component("CANCEL_FEEDBACK")
 public class CancelFeedbackProcessor implements OutcomeServiceProcessor {
 
-  @Autowired
-  private SwitchCaseIdService switchCaseIdService;
+//  @Autowired
+//  private SwitchCaseIdService switchCaseIdService;
 
   @Autowired
   private RmFieldRepublishProducer rmFieldRepublishProducer;
@@ -34,7 +34,7 @@ public class CancelFeedbackProcessor implements OutcomeServiceProcessor {
     UUID caseId = (caseIdHolder != null) ? caseIdHolder : outcome.getCaseId();
     String ncCaseId = null;
     if (type.equals("NC")) {
-      ncCaseId = switchCaseIdService.fromIdOriginalToNc(String.valueOf(caseId));
+//      ncCaseId = switchCaseIdService.fromIdOriginalToNc(String.valueOf(caseId));
     }
 
     String loggedCaseId = ncCaseId != null ? ncCaseId : String.valueOf(caseId);

@@ -1,30 +1,39 @@
 package uk.gov.ons.fwmt.outcomeprocessors.converter.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static uk.gov.ons.ctp.integration.common.product.model.Product.RequestChannel.FIELD;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ORIGINAL_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.OUTCOME_SENT;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSING_OUTCOME;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSOR;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ROUTING_KEY;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SITE_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SURVEY_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TEMPLATE_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TRANSACTION_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.FULFILMENT_REQUESTED;
+
+import java.text.DateFormat;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.census.fwmt.common.dto.FulfilmentRequestDto;
 import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.integration.common.product.ProductReference;
 import uk.gov.ons.ctp.integration.common.product.model.Product;
 import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache.GatewayCacheBuilder;
 import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
-import uk.gov.ons.fwmt.outcomeprocessors.service.GatewayCacheService;
 import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
-
-import java.text.DateFormat;
-import java.util.*;
-
-import static uk.gov.ons.ctp.integration.common.product.model.Product.RequestChannel.FIELD;
-import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.*;
-import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.FULFILMENT_REQUESTED;
 
 @Slf4j
 @Component("FULFILMENT_REQUESTED")
@@ -42,8 +51,8 @@ public class FulfilmentRequestProcessor implements OutcomeServiceProcessor {
   @Autowired
   private GatewayEventManager gatewayEventManager;
 
-  @Autowired
-  private GatewayCacheService gatewayCacheService;
+//  @Autowired
+//  private GatewayCacheService gatewayCacheService;
 
   @Override
   public UUID process(OutcomeSuperSetDto outcome, UUID caseIdHolder, String type) throws GatewayException {
@@ -94,7 +103,7 @@ public class FulfilmentRequestProcessor implements OutcomeServiceProcessor {
     root.put("requesterSurname", fulfilmentRequest.getRequesterSurname());
     root.put("requesterPhone", fulfilmentRequest.getRequesterPhone());
 
-    cacheData(caseId, individualCaseId);
+//    cacheData(caseId, individualCaseId);
 
     return TemplateCreator.createOutcomeMessage(FULFILMENT_REQUESTED, root);
   }
@@ -121,23 +130,23 @@ public class FulfilmentRequestProcessor implements OutcomeServiceProcessor {
     return (fulfilmentRequest.getQuestionnaireID() != null);
   }
 
-  private void cacheData(String caseId, String individualCaseId) {
-    GatewayCache cache = gatewayCacheService.getById(caseId);
-    GatewayCacheBuilder builder ;
-    if (cache == null) builder = GatewayCache.builder();
-    else builder = cache.toBuilder();
-
-    if (!individualCaseId.equals("")) {
-      gatewayCacheService.save(builder
-          .caseId(caseId)
-          .delivered(true)
-          .individualCaseId(individualCaseId)
-          .build());
-    } else {
-      gatewayCacheService.save(builder
-          .caseId(caseId)
-          .delivered(true)
-          .build());
-    }
-  }
+//  private void cacheData(String caseId, String individualCaseId) {
+//    GatewayCache cache = gatewayCacheService.getById(caseId);
+//    GatewayCacheBuilder builder ;
+//    if (cache == null) builder = GatewayCache.builder();
+//    else builder = cache.toBuilder();
+//
+//    if (!individualCaseId.equals("")) {
+//      gatewayCacheService.save(builder
+//          .caseId(caseId)
+//          .delivered(true)
+//          .individualCaseId(individualCaseId)
+//          .build());
+//    } else {
+//      gatewayCacheService.save(builder
+//          .caseId(caseId)
+//          .delivered(true)
+//          .build());
+//    }
+//  }
 }

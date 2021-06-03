@@ -1,7 +1,32 @@
 package uk.gov.ons.fwmt.outcomeprocessors.converter.impl;
 
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ORIGINAL_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.OUTCOME_SENT;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSING_OUTCOME;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSOR;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ROUTING_KEY;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SITE_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SURVEY_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TEMPLATE_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TRANSACTION_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.REFUSAL_RECEIVED;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
@@ -9,22 +34,9 @@ import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
 import uk.gov.ons.fwmt.outcomeprocessors.config.OutcomeSetup;
 import uk.gov.ons.fwmt.outcomeprocessors.converter.RefusalEncryptionLookup;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache;
-import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
-import uk.gov.ons.fwmt.outcomeprocessors.service.GatewayCacheService;
-import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
 import uk.gov.ons.fwmt.outcomeprocessors.encryption.EncryptNames;
-
-import javax.transaction.Transactional;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.*;
-import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.REFUSAL_RECEIVED;
+import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
+import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
 
 @Transactional
 @Component("HARD_REFUSAL_RECEIVED")
@@ -39,8 +51,8 @@ public class HardRefusalReceivedProcessor implements OutcomeServiceProcessor {
   @Autowired
   private GatewayEventManager gatewayEventManager;
 
-  @Autowired
-  private GatewayCacheService gatewayCacheService;
+//  @Autowired
+//  private GatewayCacheService gatewayCacheService;
 
   @Autowired
   private RefusalEncryptionLookup refusalEncryptionLookup;
@@ -69,9 +81,9 @@ public class HardRefusalReceivedProcessor implements OutcomeServiceProcessor {
 
     UUID caseId = (caseIdHolder != null) ? caseIdHolder : outcome.getCaseId();
 
-    GatewayCache cache = gatewayCacheService.getById(String.valueOf(caseId));
+//    GatewayCache cache = gatewayCacheService.getById(String.valueOf(caseId));
 
-    cacheData(outcome, caseId, type, cache);
+//    cacheData(outcome, caseId, type, cache);
 
     gatewayEventManager.triggerEvent(String.valueOf(caseId), PROCESSING_OUTCOME,
         SURVEY_TYPE, type,
@@ -149,32 +161,32 @@ public class HardRefusalReceivedProcessor implements OutcomeServiceProcessor {
     return Base64.getEncoder().encodeToString(formatNames.getBytes(Charset.defaultCharset()));
   }
 
-  private void cacheData(OutcomeSuperSetDto outcome, UUID caseId, String type, GatewayCache cache)
-      throws GatewayException {
-    int typeCache = type.equals("CE") ? 1 : 10;
-    String dangerousCareCode;
-    String updateCareCodes;
-    if (outcome.getRefusal() != null && type.equals("HH") && !outcome.getOutcomeCode().equals("01-03-07")) {
-      dangerousCareCode = outcome.getRefusal().isDangerous()  ? "Dangerous address" : "No safety issues";
-      updateCareCodes = outcome.getCareCodes() != null ? OutcomeSuperSetDto.careCodesToText(outcome.getCareCodes()) + ", " + dangerousCareCode :
-          dangerousCareCode;
-    } else {
-      updateCareCodes = OutcomeSuperSetDto.careCodesToText(outcome.getCareCodes());
-    }
-
-    if (cache == null) {
-      gatewayEventManager.triggerErrorEvent(HardRefusalReceivedProcessor.class,
-          "Cache lookup for hard refusal has not returned a case within cache.",
-          caseId.toString(), "Case never received by Job Service",
-          SURVEY_TYPE, type,
-          OUTCOME, outcome.toString());
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Case did not exist in cache");
-    } else {
-      gatewayCacheService.save(cache.toBuilder()
-          .accessInfo(outcome.getAccessInfo())
-          .careCodes(updateCareCodes)
-          .type(typeCache)
-          .build());
-    }
-  }
+//  private void cacheData(OutcomeSuperSetDto outcome, UUID caseId, String type, GatewayCache cache)
+//      throws GatewayException {
+//    int typeCache = type.equals("CE") ? 1 : 10;
+//    String dangerousCareCode;
+//    String updateCareCodes;
+//    if (outcome.getRefusal() != null && type.equals("HH") && !outcome.getOutcomeCode().equals("01-03-07")) {
+//      dangerousCareCode = outcome.getRefusal().isDangerous()  ? "Dangerous address" : "No safety issues";
+//      updateCareCodes = outcome.getCareCodes() != null ? OutcomeSuperSetDto.careCodesToText(outcome.getCareCodes()) + ", " + dangerousCareCode :
+//          dangerousCareCode;
+//    } else {
+//      updateCareCodes = OutcomeSuperSetDto.careCodesToText(outcome.getCareCodes());
+//    }
+//
+//    if (cache == null) {
+//      gatewayEventManager.triggerErrorEvent(HardRefusalReceivedProcessor.class,
+//          "Cache lookup for hard refusal has not returned a case within cache.",
+//          caseId.toString(), "Case never received by Job Service",
+//          SURVEY_TYPE, type,
+//          OUTCOME, outcome.toString());
+//      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Case did not exist in cache");
+//    } else {
+//      gatewayCacheService.save(cache.toBuilder()
+//          .accessInfo(outcome.getAccessInfo())
+//          .careCodes(updateCareCodes)
+//          .type(typeCache)
+//          .build());
+//    }
+//  }
 }

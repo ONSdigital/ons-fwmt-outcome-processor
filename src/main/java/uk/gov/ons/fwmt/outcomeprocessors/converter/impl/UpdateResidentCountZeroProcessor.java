@@ -1,25 +1,31 @@
 package uk.gov.ons.fwmt.outcomeprocessors.converter.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
-import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
-import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
-import uk.gov.ons.fwmt.outcomeprocessors.data.GatewayCache;
-import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
-import uk.gov.ons.fwmt.outcomeprocessors.service.GatewayCacheService;
-import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ORIGINAL_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.OUTCOME_SENT;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSING_OUTCOME;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.PROCESSOR;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.ROUTING_KEY;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SITE_CASE_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.SURVEY_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TEMPLATE_TYPE;
+import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.TRANSACTION_ID;
+import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.FIELD_CASE_UPDATED;
 
 import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static uk.gov.ons.fwmt.outcomeprocessors.converter.OutcomeServiceLogConfig.*;
-import static uk.gov.ons.fwmt.outcomeprocessors.enums.EventType.FIELD_CASE_UPDATED;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import uk.gov.ons.census.fwmt.common.dto.OutcomeSuperSetDto;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.service.OutcomeServiceProcessor;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.fwmt.outcomeprocessors.config.GatewayOutcomeQueueConfig;
+import uk.gov.ons.fwmt.outcomeprocessors.message.GatewayOutcomeProducer;
+import uk.gov.ons.fwmt.outcomeprocessors.template.TemplateCreator;
 
 @Component("UPDATE_RESIDENT_COUNT_0")
 public class UpdateResidentCountZeroProcessor implements OutcomeServiceProcessor {
@@ -33,8 +39,8 @@ public class UpdateResidentCountZeroProcessor implements OutcomeServiceProcessor
     @Autowired
     private GatewayEventManager gatewayEventManager;
 
-    @Autowired
-    private GatewayCacheService gatewayCacheService;
+//    @Autowired
+//    private GatewayCacheService gatewayCacheService;
 
     @Override
     public UUID process(OutcomeSuperSetDto outcome, UUID caseIdHolder, String type) throws GatewayException {
@@ -57,13 +63,13 @@ public class UpdateResidentCountZeroProcessor implements OutcomeServiceProcessor
 
         String outcomeEvent = TemplateCreator.createOutcomeMessage(FIELD_CASE_UPDATED, root);
 
-        GatewayCache cache = gatewayCacheService.getById(String.valueOf(caseId));
-
-        if (cache != null && ("CANCEL".equals(cache.lastActionInstruction) || "CANCEL(HELD)".equals(cache.lastActionInstruction))) {
-            gatewayCacheService.save(cache.toBuilder()
-                .lastActionInstruction(ActionInstructionType.UPDATE.toString())
-                .build());
-        }
+//        GatewayCache cache = gatewayCacheService.getById(String.valueOf(caseId));
+//
+//        if (cache != null && ("CANCEL".equals(cache.lastActionInstruction) || "CANCEL(HELD)".equals(cache.lastActionInstruction))) {
+//            gatewayCacheService.save(cache.toBuilder()
+//                .lastActionInstruction(ActionInstructionType.UPDATE.toString())
+//                .build());
+//        }
 
         gatewayOutcomeProducer.sendOutcome(outcomeEvent, String.valueOf(outcome.getTransactionId()),
                 GatewayOutcomeQueueConfig.GATEWAY_FIELD_CASE_UPDATE_ROUTING_KEY);
